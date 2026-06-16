@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "leetcode-saver",
+  "version": "0.1.0",
+  "description": "Save, query, update, list, and delete LeetCode problem records in a local JSON tracker.",
+  "author": {
+    "name": "cheche"
+  },
+  "skills": [
+    "./"
+  ]
+}

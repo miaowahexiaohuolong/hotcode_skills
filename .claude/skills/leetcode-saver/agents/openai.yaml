@@ -1,0 +1,4 @@
+interface:
+  display_name: "LeetCode Saver"
+  short_description: "Save and manage LeetCode notes locally"
+  default_prompt: "Use $leetcode-saver to save LeetCode problem notes to my local JSON tracker."
