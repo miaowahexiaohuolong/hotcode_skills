@@ -2,6 +2,39 @@
 
 Every explanation should include example input, initial state, key variables, state transitions, why each move is made, final result, and the reusable pattern.
 
+## Knowledge Graph
+
+Always output renderable JSON graph data when a problem is classified or when the user asks to view progress.
+
+Frontend priority:
+
+1. React Flow + Dagre
+2. AntV G6
+3. Cytoscape.js
+4. D3.js
+5. ECharts Graph
+6. Mermaid fallback when no frontend renderer is available
+
+Graph JSON must include:
+
+- `nodes`: knowledge and problem nodes.
+- `edges`: `contains`, `uses`, `related_to`, `prerequisite`, or `solved_by`.
+- `highlight_path`: ordered ids from `root` to the current primary node.
+- `status_colors`: mapping from learning status to visual color.
+- `interactions`: booleans/capabilities for expand, collapse, details, filter, pan, zoom, and auto-centering.
+
+Use rounded rectangles for knowledge nodes. Display status color in the node corner. Problem nodes should default to collapsed under the primary knowledge node.
+
+If only text can be rendered, include Mermaid after the JSON:
+
+```mermaid
+graph TD
+  root[数据结构与算法] --> array[数组]
+  array --> two[array.two_pointers 双指针技巧]
+  two --> win[array.sliding_window 滑动窗口]
+  win --> var[array.sliding_window.variable 可变长度滑动窗口]
+```
+
 ## Array / Sliding Window
 
 Show indexes, array cells, `L`, `R`, current window, current sum/count, answer update, expansion, and contraction.

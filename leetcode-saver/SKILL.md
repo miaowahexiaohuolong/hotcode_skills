@@ -1,11 +1,11 @@
 ---
 name: leetcode-saver
-description: Classify algorithm problems from pasted problem statements, code, or solution ideas into a data-structure-and-algorithm knowledge graph; save records, update learning progress, and generate step-by-step visual explanations. Use when the user submits any algorithm problem from LeetCode, 牛客, interviews, contests, exams, screenshots converted to text, or original company questions, even without problem id, title, or source.
+description: Classify algorithm problems from pasted problem statements, code, or solution ideas into a data-structure-and-algorithm knowledge graph; save records, update learning progress, output renderable graph JSON, highlight the current knowledge path, and generate step-by-step visual explanations. Use when the user submits any algorithm problem from LeetCode, 牛客, interviews, contests, exams, screenshots converted to text, or original company questions, even without problem id, title, or source.
 ---
 
 # Algorithm Knowledge Graph Assistant
 
-Use this skill to turn raw algorithm problem text into a structured knowledge-graph record. Do not depend on LeetCode id, title, or source. Prefer the problem statement, examples, constraints, target result, and user code/idea.
+Use this skill to turn raw algorithm problem text into a structured knowledge-graph record and renderable graph update. Do not depend on LeetCode id, title, or source. Prefer the problem statement, examples, constraints, target result, and user code/idea.
 
 ## Core Rule
 
@@ -37,8 +37,9 @@ Classify from the content itself. Never refuse only because id, title, or source
 5. Explain why the recommended algorithm fits and why alternatives are not preferred.
 6. Generate a step-by-step visual explanation.
 7. Save a record with `scripts/leetcode_saver.py record`. If no id/title/source exists, save by content hash.
-8. Update progress only from evidence. If there is only a pasted problem and no code or feedback, mark the node as `learning` / 待验证, not mastered.
-9. Ask one follow-up at the end when useful: whether the user solved independently, with hints, or after reading the answer.
+8. Use the JSON returned by `record` as the renderable knowledge graph update. It must include `classification`, `highlight_path`, `node_updates`, `problem_node`, `nodes`, and `edges`.
+9. Update progress only from evidence. If there is only a pasted problem and no code or feedback, mark the node as `learning` / 待验证, not mastered.
+10. Ask one follow-up at the end when useful: whether the user solved independently, with hints, or after reading the answer.
 
 ## Input Recognition Rules
 
@@ -61,7 +62,7 @@ Do not classify from title alone. Do not depend on problem number. Problem id, t
 
 ## Required Output Format
 
-```markdown
+~~~markdown
 # 题目知识点识别
 
 ## 1. 题目摘要
@@ -149,7 +150,22 @@ Do not classify from title alone. Do not depend on problem number. Problem id, t
 同级变体：
 
 进阶变体：
+
+## 9. 知识图谱更新数据
+
+```json
+{
+  "classification": {},
+  "highlight_path": [],
+  "node_updates": [],
+  "problem_node": {},
+  "nodes": [],
+  "edges": []
+}
 ```
+~~~
+
+Always include section 9 after saving the record. The JSON must be renderable by a frontend and must not be replaced by a static screenshot.
 
 ## Learning Status Rules
 
@@ -179,7 +195,7 @@ If the user submits code, evaluate:
 
 ## Saving Records
 
-After producing the analysis, save the structured result:
+After producing the analysis, save the structured result. The command prints the graph update JSON that must be included in the answer:
 
 ```bash
 python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py record \
@@ -194,7 +210,8 @@ python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py re
   --secondary-node "array.two_pointers" \
   --secondary-node "array.interval_sum" \
   --recommended-algorithm "可变长度滑动窗口" \
-  --status learning
+  --status learning \
+  --mastery-delta 8
 ```
 
 Optional metadata:
@@ -209,17 +226,86 @@ Optional metadata:
 - `--candidate-algorithm` repeated
 - `--visualization-type`
 - `--visualization-step` repeated; pass one JSON object string per step
+- `--correct`
+- `--independent`
+- `--mistake` repeated
+- `--review-count`
+- `--mastery-delta`
 - `--note`
 
-If no `--question-id` is provided, the script generates `q_<sha256-prefix>` from content, code, or summary.
+If no `--question-id` is provided, the script generates `problem_<sha256-prefix>` from content, code, or summary.
 
 Query and progress:
 
 ```bash
 python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py list
-python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py get q_xxxxxxxx
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py get problem_xxxxxxxx
 python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py progress
 ```
+
+Export renderable graph JSON:
+
+```bash
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py graph --view all --include-problems
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py graph --view current --highlight-node array.sliding_window.variable --include-problems
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py graph --view weak
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py graph --view recent --include-problems
+```
+
+## Knowledge Graph Rendering Contract
+
+The graph JSON must support:
+
+- Rounded-rectangle nodes.
+- Parent-child edges and problem-to-knowledge edges.
+- Node status color: `unlearned` gray, `weak` red, `learning` orange, `mastered` green.
+- Expand/collapse, node details, status filters, complete/current/weak/recent/progress views.
+- Highlighting from `root` to the current primary knowledge node.
+- Problem nodes that can be collapsed under their primary knowledge node.
+
+Each knowledge node must expose:
+
+```json
+{
+  "id": "array.sliding_window.variable",
+  "type": "knowledge",
+  "name": "可变长度滑动窗口",
+  "parent_id": "array.sliding_window",
+  "category": "数组",
+  "level": 4,
+  "status": "learning",
+  "status_color": "orange",
+  "mastery_score": 65,
+  "problem_count": 3,
+  "correct_count": 2,
+  "independent_count": 1,
+  "review_count": 0,
+  "mistake_count": 1,
+  "is_highlighted": true,
+  "is_expanded": true
+}
+```
+
+Each edge must expose:
+
+```json
+{
+  "source": "array.sliding_window",
+  "target": "array.sliding_window.variable",
+  "relation": "contains",
+  "highlighted": true
+}
+```
+
+Supported edge relations:
+
+- `contains`: parent knowledge node contains child knowledge node.
+- `uses`: problem uses an auxiliary knowledge node.
+- `related_to`: two knowledge nodes are related.
+- `prerequisite`: one node is a prerequisite.
+- `solved_by`: problem is solved by a primary knowledge node.
+
+If there is a frontend, prefer React Flow + Dagre. If only text output is possible, include a Mermaid fallback, but still output JSON first.
 
 ## Example: Variable Sliding Window
 
