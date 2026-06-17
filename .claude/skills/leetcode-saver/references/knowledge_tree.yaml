@@ -1,0 +1,128 @@
+root:
+  id: dsa
+  name: 数据结构与算法
+
+nodes:
+  array:
+    name: 数组
+    path: 数据结构与算法 > 数组
+  array.two_pointers:
+    name: 双指针
+    parent: array
+    path: 数据结构与算法 > 数组 > 双指针
+  array.subarray:
+    name: 连续子数组
+    parent: array
+    path: 数据结构与算法 > 数组 > 连续子数组
+  array.interval_sum:
+    name: 区间和维护
+    parent: array
+    path: 数据结构与算法 > 数组 > 区间和维护
+  array.prefix_sum:
+    name: 前缀和
+    parent: array
+    path: 数据结构与算法 > 数组 > 前缀和
+  array.sliding_window:
+    name: 滑动窗口
+    parent: array.two_pointers
+    path: 数据结构与算法 > 数组 > 双指针 > 滑动窗口
+  array.sliding_window.fixed:
+    name: 固定长度滑动窗口
+    parent: array.sliding_window
+    path: 数据结构与算法 > 数组 > 双指针 > 滑动窗口 > 固定长度滑动窗口
+  array.sliding_window.variable:
+    name: 可变长度滑动窗口
+    parent: array.sliding_window
+    path: 数据结构与算法 > 数组 > 双指针 > 滑动窗口 > 可变长度滑动窗口
+  hash.table:
+    name: 哈希表
+    path: 数据结构与算法 > 哈希表
+  hash.frequency:
+    name: 频率统计
+    parent: hash.table
+    path: 数据结构与算法 > 哈希表 > 频率统计
+  stack.queue:
+    name: 栈与队列
+    path: 数据结构与算法 > 栈与队列
+  stack.monotonic:
+    name: 单调栈
+    parent: stack.queue
+    path: 数据结构与算法 > 栈与队列 > 单调栈
+  queue.monotonic:
+    name: 单调队列
+    parent: stack.queue
+    path: 数据结构与算法 > 栈与队列 > 单调队列
+  linked_list:
+    name: 链表
+    path: 数据结构与算法 > 链表
+  linked_list.fast_slow_pointer:
+    name: 快慢指针
+    parent: linked_list
+    path: 数据结构与算法 > 链表 > 快慢指针
+  linked_list.reverse:
+    name: 链表反转
+    parent: linked_list
+    path: 数据结构与算法 > 链表 > 链表反转
+  tree:
+    name: 树
+    path: 数据结构与算法 > 树
+  tree.binary_tree:
+    name: 二叉树
+    parent: tree
+    path: 数据结构与算法 > 树 > 二叉树
+  tree.binary_tree.dfs:
+    name: 二叉树深度优先搜索
+    parent: tree.binary_tree
+    path: 数据结构与算法 > 树 > 二叉树 > 深度优先搜索
+  tree.binary_tree.bfs:
+    name: 二叉树广度优先搜索
+    parent: tree.binary_tree
+    path: 数据结构与算法 > 树 > 二叉树 > 广度优先搜索
+  graph:
+    name: 图
+    path: 数据结构与算法 > 图
+  graph.bfs:
+    name: 图广度优先搜索
+    parent: graph
+    path: 数据结构与算法 > 图 > 广度优先搜索
+  graph.dfs:
+    name: 图深度优先搜索
+    parent: graph
+    path: 数据结构与算法 > 图 > 深度优先搜索
+  graph.shortest_path:
+    name: 最短路径
+    parent: graph
+    path: 数据结构与算法 > 图 > 最短路径
+  graph.shortest_path.dijkstra:
+    name: Dijkstra 最短路径
+    parent: graph.shortest_path
+    path: 数据结构与算法 > 图 > 最短路径 > Dijkstra
+  dp:
+    name: 动态规划
+    path: 数据结构与算法 > 动态规划
+  dp.linear:
+    name: 线性 DP
+    parent: dp
+    path: 数据结构与算法 > 动态规划 > 线性 DP
+  dp.knapsack:
+    name: 背包 DP
+    parent: dp
+    path: 数据结构与算法 > 动态规划 > 背包 DP
+  backtracking:
+    name: 回溯
+    path: 数据结构与算法 > 回溯
+  backtracking.subsets:
+    name: 子集型回溯
+    parent: backtracking
+    path: 数据结构与算法 > 回溯 > 子集型回溯
+  backtracking.permutation:
+    name: 排列型回溯
+    parent: backtracking
+    path: 数据结构与算法 > 回溯 > 排列型回溯
+  binary_search:
+    name: 二分查找
+    path: 数据结构与算法 > 二分查找
+  binary_search.answer:
+    name: 二分答案
+    parent: binary_search
+    path: 数据结构与算法 > 二分查找 > 二分答案

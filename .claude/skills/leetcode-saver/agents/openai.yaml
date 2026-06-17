@@ -1,4 +1,4 @@
 interface:
-  display_name: "LeetCode Saver"
-  short_description: "Save and manage LeetCode notes locally"
-  default_prompt: "Use $leetcode-saver to save LeetCode problem notes to my local JSON tracker."
+  display_name: "算法刷题知识图谱助手"
+  short_description: "自动归类算法题并记录学习进度"
+  default_prompt: "Use $leetcode-saver to classify this algorithm problem into my knowledge graph and save the learning record."

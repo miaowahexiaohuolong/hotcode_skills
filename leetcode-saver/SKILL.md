@@ -1,113 +1,233 @@
 ---
 name: leetcode-saver
-description: Save, query, update, list, and delete LeetCode problem records in a local JSON tracker. Use when the user asks Codex to remember, record, log, save, look up, list, update, mark, or delete solved LeetCode questions, including requests in Chinese such as 保存题目、记录刷题、查询题号、更新状态、标记已掌握、删除题目.
+description: Classify algorithm problems from pasted problem statements, code, or solution ideas into a data-structure-and-algorithm knowledge graph; save records, update learning progress, and generate step-by-step visual explanations. Use when the user submits any algorithm problem from LeetCode, 牛客, interviews, contests, exams, screenshots converted to text, or original company questions, even without problem id, title, or source.
 ---
 
-# LeetCode Saver
+# Algorithm Knowledge Graph Assistant
 
-Use this skill to maintain a local LeetCode practice log. Store data in a single UTF-8 JSON file and prefer the bundled script for all read/write operations.
+Use this skill to turn raw algorithm problem text into a structured knowledge-graph record. Do not depend on LeetCode id, title, or source. Prefer the problem statement, examples, constraints, target result, and user code/idea.
 
-## Data File
+## Core Rule
 
-Default path: `data/leetcode_problems.json` in the current workspace.
+The user may paste any of:
 
-The JSON shape is:
+- Complete or partial problem statement.
+- Requirements plus examples.
+- Statement plus constraints.
+- User code only.
+- Statement plus user code.
+- User solution idea.
+- OCR text from a screenshot.
+- Company interview, exam, contest, or unpublished problem.
 
-```json
-{
-  "problems": {
-    "3": {
-      "id": "3",
-      "title": "Longest Substring Without Repeating Characters",
-      "title_cn": "无重复字符的最长子串",
-      "difficulty": "medium",
-      "category": "字符串",
-      "topic": "滑动窗口",
-      "content": "给定一个字符串 s ，请你找出其中不含有重复字符的最长子串的长度。",
-      "examples": [
-        "示例 1:\n输入: s = \"abcabcbb\"\n输出: 3\n解释: 因为无重复字符的最长子串是 \"abc\"，所以其长度为 3。"
-      ],
-      "status": "fuzzy",
-      "note": "左边界要跳到 max(left, last_seen[char]+1)",
-      "added_at": "2026-06-15 22:20:00"
-    }
-  }
-}
+Classify from the content itself. Never refuse only because id, title, or source is missing. If information is insufficient, still give candidate classifications and explain what condition would decide between them.
+
+## Reference Files
+
+- Read `references/knowledge_tree.yaml` when you need stable node IDs or graph paths.
+- Read `references/classification_rules.md` when deciding between candidate algorithms.
+- Read `references/visualization_rules.md` before generating visual explanation steps.
+
+## Fixed Workflow
+
+1. Parse the problem, examples, constraints, code, and user stated completion status.
+2. Extract features: data object, target result, continuity, ordering, input size, value range, negatives, duplicates, in-place requirement, min/max/longest/shortest, all-solution requirement, graph/tree relations, and code structures.
+3. Generate candidate algorithms.
+4. Match the best knowledge-graph node and auxiliary nodes.
+5. Explain why the recommended algorithm fits and why alternatives are not preferred.
+6. Generate a step-by-step visual explanation.
+7. Save a record with `scripts/leetcode_saver.py record`. If no id/title/source exists, save by content hash.
+8. Update progress only from evidence. If there is only a pasted problem and no code or feedback, mark the node as `learning` / 待验证, not mastered.
+9. Ask one follow-up at the end when useful: whether the user solved independently, with hints, or after reading the answer.
+
+## Input Recognition Rules
+
+Prioritize:
+
+- Operation object.
+- Input/output format.
+- Data size.
+- Element properties.
+- Continuous vs non-continuous.
+- Ordered vs unordered.
+- Whether negative values can appear.
+- Duplicate rules.
+- In-place constraints.
+- Shortest/longest/min/max/all-solutions target.
+- Relationship structure such as tree, graph, dependency, interval, grid.
+- User code data structures and algorithm shape.
+
+Do not classify from title alone. Do not depend on problem number. Problem id, title, source, and difficulty are optional metadata.
+
+## Required Output Format
+
+```markdown
+# 题目知识点识别
+
+## 1. 题目摘要
+
+目标：
+
+输入特征：
+- 
+
+## 2. 识别结果
+
+主知识点：
+
+辅助知识点：
+- 
+
+题型标签：
+- 
+
+识别置信度：
+
+## 3. 知识图谱位置
+
+数据结构与算法
+└── ...
+
+主节点 ID：
+
+辅助节点 ID：
+- 
+
+## 4. 分类依据
+
+为什么属于该类型：
+
+不优先选择其他算法：
+- 
+
+候选算法：
+- 
+
+推荐算法：
+
+时间复杂度：
+
+空间复杂度：
+
+## 5. 可视化解释
+
+### 示例输入
+
+### 初始状态
+
+### 第 1 步
+
+### 第 2 步
+
+### 最终结果
+
+## 6. 学习状态
+
+本次操作：
+
+知识点状态：
+
+原因：
+
+已记录题目数：
+
+## 7. 题型识别口诀
+
+看到：
+- 
+
+优先考虑：
+- 
+
+不适用情况：
+- 
+
+## 8. 关联题型
+
+基础变体：
+
+同级变体：
+
+进阶变体：
 ```
 
-## Workflow
+## Learning Status Rules
 
-1. Identify the requested operation: `add`, `get`, `list`, `update`, or `delete`.
-2. Use `scripts/leetcode_saver.py` from this skill directory to perform the operation.
-3. When the user pastes LeetCode problem text, extract and save the problem statement as `content`.
-4. Extract examples into `examples` when present. If no examples are present, omit `examples`; do not ask for examples.
-5. If the user asks to save a problem and omits required fields, ask only for missing required fields: `title`, `difficulty`, `category`, or `topic`.
-6. If the user provides enough information, do not ask for confirmation before adding or updating. Use `--yes` when overwriting or deleting only if the user clearly requested that action.
-7. Report the result briefly, including the problem id and where the data was saved.
+Use these canonical status values in saved data:
 
-## Commands
+- `unlearned` / ⚪ 未学习
+- `weak` / 🔴 薄弱
+- `learning` / 🟠 学习中
+- `mastered` / 🟢 已掌握
 
-Run the script from any workspace:
+Do not mark `mastered` from one pasted problem. Upgrade only when the user provides evidence such as independent solution, correct code, complexity explanation, transfer to variants, or repeated correct performance.
+
+If the user only pastes a problem statement:
+
+```text
+本次操作：完成题目识别与知识点归类。
+知识点状态：🟠 待验证
+原因：目前只知道用户提交了这道题，还不知道是否独立完成、是否理解算法、代码是否正确，因此不能标记为已掌握。
+```
+
+If the user submits code, evaluate:
+
+- Whether the code implements the identified algorithm.
+- Correctness and edge cases.
+- Time and space complexity.
+- Whether status should remain weak, become learning, or be suggested as mastered only with enough evidence.
+
+## Saving Records
+
+After producing the analysis, save the structured result:
+
+```bash
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py record \
+  --content "<problem statement or code>" \
+  --summary "<short problem summary>" \
+  --primary-node "array.sliding_window.variable" \
+  --primary-knowledge "数组 → 双指针 → 滑动窗口 → 可变长度滑动窗口" \
+  --graph-path "数据结构与算法 > 数组 > 双指针 > 滑动窗口 > 可变长度滑动窗口" \
+  --confidence 98 \
+  --tag "连续区间" \
+  --tag "最短长度" \
+  --secondary-node "array.two_pointers" \
+  --secondary-node "array.interval_sum" \
+  --recommended-algorithm "可变长度滑动窗口" \
+  --status learning
+```
+
+Optional metadata:
+
+- `--question-id`
+- `--title`
+- `--source`
+- `--difficulty`
+- `--example` repeated for examples
+- `--user-code`
+- `--user-idea`
+- `--candidate-algorithm` repeated
+- `--visualization-type`
+- `--visualization-step` repeated; pass one JSON object string per step
+- `--note`
+
+If no `--question-id` is provided, the script generates `q_<sha256-prefix>` from content, code, or summary.
+
+Query and progress:
 
 ```bash
 python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py list
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py get q_xxxxxxxx
+python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py progress
 ```
 
-Add a problem:
+## Example: Variable Sliding Window
 
-```bash
-python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py add 3 "Longest Substring Without Repeating Characters" \
-  --title-cn "无重复字符的最长子串" \
-  --difficulty medium \
-  --category "字符串" \
-  --topic "滑动窗口" \
-  --content "给定一个字符串 s ，请你找出其中不含有重复字符的最长子串的长度。" \
-  --example "示例 1:\n输入: s = \"abcabcbb\"\n输出: 3\n解释: 因为无重复字符的最长子串是 \"abc\"，所以其长度为 3。" \
-  --status fuzzy \
-  --note "左边界要跳到 max(left, last_seen[char]+1)"
-```
+For the problem asking for the minimum length contiguous subarray with sum at least `target`, where `nums` contains positive integers:
 
-Query, update, and delete:
+- Main node: `array.sliding_window.variable`.
+- Auxiliary nodes: `array.two_pointers`, `array.subarray`, `array.interval_sum`.
+- Reason: continuous subarray, positive numbers, shortest satisfying interval, window sum can be maintained while both pointers move monotonically.
+- Not preferred: O(n^2) interval enumeration; dynamic programming; monotonic queue when all numbers are positive.
 
-```bash
-python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py get 3
-python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py update 3 --status mastered --note "已掌握"
-python /Volumes/UD210/hotcode_skills/leetcode-saver/scripts/leetcode_saver.py delete 3
-```
-
-Use `--data-path <path>` when the user wants a non-default JSON file.
-
-## Field Rules
-
-- `id`: required string, unique primary key.
-- `title`: required English title.
-- `title_cn`: optional Chinese title.
-- `difficulty`: required; one of `easy`, `medium`, `hard`.
-- `category`: required primary category, such as `数组`, `字符串`, `动态规划`.
-- `topic`: required focused topic, such as `滑动窗口`, `前缀和`.
-- `content`: optional for manual logging, but include it when extracting from pasted LeetCode problem text. Store the actual problem statement and constraints, not site UI labels.
-- `examples`: optional list of examples. Include only when examples exist; omit the field when absent.
-- `status`: one of `mastered`, `fuzzy`, `weak`; default `fuzzy`.
-- `note`: optional, default empty string.
-- `added_at`: generated automatically and preserved during updates.
-
-## Problem Text Extraction
-
-When the user provides raw LeetCode page text:
-
-- Extract `id`, `title_cn`, and `difficulty` from heading lines such as `3. 无重复字符的最长子串` and `中等`.
-- Map Chinese difficulties: `简单` -> `easy`, `中等` -> `medium`, `困难` -> `hard`.
-- Put the actual prompt, requirements,说明, and提示/constraints into `content`.
-- Put each `示例 N` block into one `--example` value. Include input, output, explanation, and related code snippets inside that example block.
-- Ignore UI noise such as `代码`, `测试用例`, `测试结果`, `相关标签`, `premium lock icon`, `相关企业`, and standalone navigation labels.
-- If examples are not present, do not invent examples and do not include `examples`.
-- If category or topic is not explicit, infer a concise value from the problem when obvious; otherwise ask the user.
-
-## User Interaction
-
-- For "帮我保存 LeetCode 3..." or "记录第 3 题...", add the problem.
-- For pasted full problem statements, save both `content` and any example blocks.
-- For "第 3 题我已经掌握了", run `update 3 --status mastered`.
-- For "列出我刷过的题", run `list`.
-- For "查询 3", run `get 3`.
-- For "删除 3", run `delete 3`; confirm with the user if their wording is ambiguous.
+Visualization should show indexes, array cells, `L`, `R`, current window, sum, answer, expansion, and contraction.

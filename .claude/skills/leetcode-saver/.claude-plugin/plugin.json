@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "leetcode-saver",
   "version": "0.1.0",
-  "description": "Save, query, update, list, and delete LeetCode problem records in a local JSON tracker.",
+  "description": "Classify algorithm problems into a knowledge graph, save records, update progress, and generate visual explanations.",
   "author": {
     "name": "cheche"
   },
